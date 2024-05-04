@@ -1,0 +1,118 @@
+import 'dart:io';
+import 'dart:math';
+
+class TicTacToe {
+  List<String> board = List.filled(9, ' ');
+  bool isPlayer1Turn = true;
+  int moves = 0;
+  bool gameOver = false;
+
+  void displayBoard() {
+    print('\x1B[2J\x1B[0;0H');
+    print('    Tic Tac Toe\n');
+    print(' ${coloredSymbol(board[0])} | ${coloredSymbol(board[1])} | ${coloredSymbol(board[2])} ');
+    print('---+---+---');
+    print(' ${coloredSymbol(board[3])} | ${coloredSymbol(board[4])} | ${coloredSymbol(board[5])} ');
+    print('---+---+---');
+    print(' ${coloredSymbol(board[6])} | ${coloredSymbol(board[7])} | ${coloredSymbol(board[8])} ');
+  }
+
+  String coloredSymbol(String symbol) {
+    return symbol == 'X'
+        ? '\x1B[31mX\x1B[0m'
+        : symbol == 'O'
+            ? '\x1B[34mO\x1B[0m'
+            : ' ';
+  }
+
+  bool makeMove(int position) {
+    if (position < 1 || position > 9 || board[position - 1] != ' ' || gameOver) {
+      return false;
+    }
+    board[position - 1] = isPlayer1Turn ? 'X' : 'O';
+    moves++;
+    return true;
+  }
+
+  bool checkWin(String player) {
+    List<List<int>> winConditions = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8], // Rows
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8], // Columns
+      [0, 4, 8],
+      [2, 4, 6] // Diagonals
+    ];
+
+    for (var condition in winConditions) {
+      if (board[condition[0]] == player && board[condition[1]] == player && board[condition[2]] == player) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool checkDraw() {
+    return moves == 9;
+  }
+
+  void play() {
+    print('\x1B[2J\x1B[0;0H');
+    print('    Welcome to Tic Tac Toe!\n');
+    displayBoard();
+    print('\nEach player takes turns to enter their move (1-9).\n');
+    while (!gameOver) {
+      if (isPlayer1Turn) {
+        if (!playerMove()) continue;
+      } else {
+        if (!aiMove()) continue;
+      }
+
+      displayBoard();
+      if (checkWin(isPlayer1Turn ? 'X' : 'O')) {
+        print('\n${isPlayer1Turn ? "Player 1" : "AI"} wins!\n');
+        gameOver = true;
+        break;
+      } else if (checkDraw()) {
+        print("\nIt's a draw!\n");
+        gameOver = true;
+        break;
+      }
+
+      isPlayer1Turn = !isPlayer1Turn;
+    }
+  }
+
+  bool playerMove() {
+    int position;
+    do {
+      print('Player 1, enter your move (1-9):');
+      String? input = stdin.readLineSync();
+      if (input == null) {
+        print('Invalid input. Please try again.');
+        continue;
+      }
+      position = int.tryParse(input) ?? -1;
+    } while (!makeMove(position));
+    return true;
+  }
+
+  bool aiMove() {
+    print('AI is making a move...');
+    sleep(Duration(seconds: 1)); // Simulating AI thinking time
+
+    // Generate a random move
+    int position;
+    do {
+      position = Random().nextInt(9) + 1;
+    } while (!makeMove(position));
+    return true;
+  }
+}
+
+void main() {
+  TicTacToe game = TicTacToe();
+  game.play();
+}
