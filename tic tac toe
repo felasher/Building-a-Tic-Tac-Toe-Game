@@ -1,0 +1,85 @@
+import 'dart:io';
+
+class TicTacToe {
+  List<String> board = List.filled(9, ' ');
+  String currentPlayer = 'X';
+
+  void displayBoard() {
+    print('\x1B[2J\x1B[0;0H'); // Clear screen
+    print('    Tic Tac Toe\n');
+
+    print(' ${coloredSymbol(board[0])} | ${coloredSymbol(board[1])} | ${coloredSymbol(board[2])} ');
+    print('---+---+---');
+    print(' ${coloredSymbol(board[3])} | ${coloredSymbol(board[4])} | ${coloredSymbol(board[5])} ');
+    print('---+---+---');
+    print(' ${coloredSymbol(board[6])} | ${coloredSymbol(board[7])} | ${coloredSymbol(board[8])} ');
+  }
+
+  String coloredSymbol(String symbol) {
+    return symbol == 'X'
+        ? '\x1B[31mX\x1B[0m' // Red color for X
+        : symbol == 'O'
+            ? '\x1B[34mO\x1B[0m' // Blue color for O
+            : ' '; // Empty space
+  }
+
+  bool isMoveValid(int position) {
+    return position >= 0 && position < 9 && board[position] == ' ';
+  }
+
+  bool checkWin() {
+    List<List<int>> winConditions = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8], // Rows
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8], // Columns
+      [0, 4, 8],
+      [2, 4, 6] // Diagonals
+    ];
+
+    for (var condition in winConditions) {
+      if (board[condition[0]] != ' ' &&
+          board[condition[0]] == board[condition[1]] &&
+          board[condition[1]] == board[condition[2]]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool checkDraw() {
+    return !board.contains(' ');
+  }
+
+  void play() {
+    print('\x1B[2J\x1B[0;0H'); // Clear screen
+    print('    Welcome to Tic Tac Toe!\n');
+    displayBoard();
+    print('\nEach player takes turns to enter their move (1-9).\n');
+    while (true) {
+      int position;
+      do {
+        print('Player $currentPlayer, enter your move:');
+        position = int.tryParse(stdin.readLineSync()!) ?? -1;
+      } while (!isMoveValid(position - 1));
+
+      board[position - 1] = currentPlayer;
+      displayBoard();
+      if (checkWin()) {
+        print('\nPlayer $currentPlayer wins!\n');
+        break;
+      } else if (checkDraw()) {
+        print('\nIt\'s a draw!\n');
+        break;
+      }
+      currentPlayer = currentPlayer == 'X' ? 'O' : 'X';
+    }
+  }
+}
+
+void main() {
+  TicTacToe game = TicTacToe();
+  game.play();
+}
